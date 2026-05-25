@@ -70,6 +70,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .kpi-card .sub{font-size:11px;color:var(--muted);margin-top:3px;}
 .kpi-card .arrow{position:absolute;bottom:8px;right:10px;font-size:10px;color:var(--muted);transition:transform .2s;}
 .kpi-card.active .arrow{transform:rotate(180deg);}
+.kpi-dl-btn{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.07);border:none;border-radius:5px;padding:3px 7px;font-size:11px;cursor:pointer;color:var(--muted);line-height:1.4;z-index:2;}
+.kpi-dl-btn:hover{background:rgba(0,0,0,.15);color:var(--text);}
 .kc-blue{border-color:#2563eb;} .kc-blue .val{color:#2563eb;}
 .kc-dark{border-color:#1f2937;} .kc-dark .val{color:#1f2937;}
 .kc-green{border-color:#059669;} .kc-green .val{color:#059669;}
@@ -231,12 +233,12 @@ td{padding:9px 12px;white-space:nowrap;}
 
     <!-- KPI Cards -->
     <div class="kpi-grid" style="margin-bottom:4px;">
-      <div class="kpi-card kc-blue" onclick="expandKpi('total')"><div class="lbl">Total PAC Fault</div><div class="val" id="kv-total">0</div><div class="sub">All records</div><div class="arrow">▼</div></div>
-      <div class="kpi-card kc-dark" onclick="expandKpi('nc')"><div class="lbl">🔴 Not Cleared</div><div class="val" id="kv-nc">0</div><div class="sub">Clear time missing</div><div class="arrow">▼</div></div>
-      <div class="kpi-card kc-green" onclick="expandKpi('fast')"><div class="lbl">🟢 Fast ≤ 2 min</div><div class="val" id="kv-fast">0</div><div class="sub">Normal restore</div><div class="arrow">▼</div></div>
-      <div class="kpi-card kc-amber" onclick="expandKpi('mod')"><div class="lbl">🟡 Moderate 3-5 min</div><div class="val" id="kv-mod">0</div><div class="sub">Watch closely</div><div class="arrow">▼</div></div>
-      <div class="kpi-card kc-red" onclick="expandKpi('alarm')"><div class="lbl">🔴 Alarming &gt; 5 min</div><div class="val" id="kv-alarm">0</div><div class="sub">Focus area</div><div class="arrow">▼</div></div>
-      <div class="kpi-card kc-sky" onclick="expandKpi('acpf')"><div class="lbl">⚡ AC Power Fail</div><div class="val" id="kv-acpf">0</div><div class="sub">All AC fail alarms</div><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-blue" onclick="expandKpi('total')"><div class="lbl">Total PAC Fault</div><div class="val" id="kv-total">0</div><div class="sub">All records</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('total')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-dark" onclick="expandKpi('nc')"><div class="lbl">🔴 Not Cleared</div><div class="val" id="kv-nc">0</div><div class="sub">Clear time missing</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('nc')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-green" onclick="expandKpi('fast')"><div class="lbl">🟢 Fast ≤ 2 min</div><div class="val" id="kv-fast">0</div><div class="sub">Normal restore</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('fast')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-amber" onclick="expandKpi('mod')"><div class="lbl">🟡 Moderate 3-5 min</div><div class="val" id="kv-mod">0</div><div class="sub">Watch closely</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('mod')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-red" onclick="expandKpi('alarm')"><div class="lbl">🔴 Alarming &gt; 5 min</div><div class="val" id="kv-alarm">0</div><div class="sub">Focus area</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('alarm')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+      <div class="kpi-card kc-sky" onclick="expandKpi('acpf')"><div class="lbl">⚡ AC Power Fail</div><div class="val" id="kv-acpf">0</div><div class="sub">All AC fail alarms</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('acpf')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
     </div>
 
     <!-- KPI Detail Panel -->
@@ -261,29 +263,30 @@ td{padding:9px 12px;white-space:nowrap;}
         <div class="ch"><canvas id="ch-cat"></canvas></div>
       </div>
       <div class="ccard">
-        <h3>📅 Day-wise PAC Fault Trend (by Bucket)</h3>
-        <div class="chart-hint">🖱 Click a bar segment to drill into records</div>
-        <div class="ch"><canvas id="ch-day"></canvas></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <h3 style="margin-bottom:0">⏱ Top 10 Alarming Sites with Longest Downtime</h3>
+          <button class="kpi-dl-btn" style="position:static;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;padding:4px 10px;font-size:12px;" onclick="downloadTopDowntime()" title="Download Excel">⬇ Download</button>
+        </div>
+        <div class="chart-hint">🖱 Click a bar to see site records</div>
+        <div class="ch-lg"><canvas id="ch-day"></canvas></div>
       </div>
     </div>
 
     <!-- Charts Row 2 -->
-    <div class="g2">
+    <div style="margin-bottom:20px;max-width:55%;">
       <div class="ccard">
         <h3>🏗 Site Type Analysis (Stacked by Bucket)</h3>
         <div class="chart-hint">🖱 Click a bar segment to drill into records</div>
-        <div class="ch"><canvas id="ch-site"></canvas></div>
-      </div>
-      <div class="ccard">
-        <h3>🗺 Circle-wise Alarm Count (Top 15)</h3>
-        <div class="chart-hint">🖱 Click a bar to see all alarms for that circle</div>
-        <div class="ch-lg"><canvas id="ch-circle"></canvas></div>
+        <div style="position:relative;height:200px;"><canvas id="ch-site"></canvas></div>
       </div>
     </div>
 
     <!-- AC Power Fail Pairing Section -->
     <div class="ccard" style="margin-bottom:20px;">
-      <div class="stitle">⚡ AC Power Fail ↔ PAC Fault Pairing Analysis <span class="badge bg-sky" id="badge-pair">0</span></div>
+      <div class="stitle" style="justify-content:space-between;">
+        <span>⚡ AC Power Fail ↔ PAC Fault Pairing Analysis <span class="badge bg-sky" id="badge-pair">0</span></span>
+        <button class="kpi-dl-btn" style="position:static;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;padding:4px 10px;font-size:12px;" onclick="downloadPairTable()" title="Download full pairing table">⬇ Download</button>
+      </div>
       <div class="minis" id="pair-minis"></div>
       <div class="alert-box">📌 <strong>Logic:</strong> EB power fails → AC Power Fail alarm raises → PAC loses AC input → PAC Fault raises. PAC Fault clears when EB is restored. Pairs are matched by site &amp; time window (AC raised 0–10 min before PAC Fault).</div>
       <div class="tbl-ctrl">
@@ -291,40 +294,44 @@ td{padding:9px 12px;white-space:nowrap;}
         <span class="tinfo" id="i-pair"></span>
       </div>
       <div class="twrap"><table id="t-pair"><thead><tr>
-        <th onclick="sortTbl('t-pair',0)">Site Name</th>
-        <th onclick="sortTbl('t-pair',1)">Circle</th>
-        <th onclick="sortTbl('t-pair',2)">Site Type</th>
-        <th onclick="sortTbl('t-pair',3)">PAC Raised</th>
-        <th onclick="sortTbl('t-pair',4)">PAC Cleared</th>
-        <th onclick="sortTbl('t-pair',5)">Duration</th>
-        <th onclick="sortTbl('t-pair',6)">Bucket</th>
-        <th onclick="sortTbl('t-pair',7)">AC Fail Raised</th>
-        <th onclick="sortTbl('t-pair',8)">AC-PAC Gap</th>
-        <th onclick="sortTbl('t-pair',9)">Paired</th>
-        <th onclick="sortTbl('t-pair',10)">SAPID</th>
+        <th onclick="sortTbl('t-pair',0)">SAP Id</th>
+        <th onclick="sortTbl('t-pair',1)">Site Name</th>
+        <th onclick="sortTbl('t-pair',2)">Circle</th>
+        <th onclick="sortTbl('t-pair',3)">Site Type</th>
+        <th onclick="sortTbl('t-pair',4)">PAC Raise Time</th>
+        <th onclick="sortTbl('t-pair',5)">PAC Clear Time</th>
+        <th onclick="sortTbl('t-pair',6)">Duration</th>
+        <th onclick="sortTbl('t-pair',7)">Bucket</th>
+        <th onclick="sortTbl('t-pair',8)">AC Fail Raised</th>
+        <th onclick="sortTbl('t-pair',9)">AC-PAC Gap</th>
+        <th onclick="sortTbl('t-pair',10)">Paired</th>
       </tr></thead><tbody id="tbody-pair"></tbody></table></div>
     </div>
 
     <!-- Alarming >5 min Focus Section -->
     <div class="ccard" style="margin-bottom:20px;">
-      <div class="stitle">🔴 Alarming PAC Faults — &gt; 5 min (Focus Area) <span class="badge bg-red" id="badge-alarm">0</span></div>
+      <div class="stitle" style="justify-content:space-between;">
+        <span>🔴 Alarming PAC Faults — &gt; 5 min (Focus Area) <span class="badge bg-red" id="badge-alarm">0</span></span>
+        <button class="kpi-dl-btn" style="position:static;background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:4px 10px;font-size:12px;" onclick="downloadAlarmTable()" title="Download alarming faults">⬇ Download</button>
+      </div>
       <div class="alert-box">🔍 These PAC Fault alarms took more than <strong>5 minutes</strong> to clear. These are the priority sites for analysis and rectification.</div>
       <div class="tbl-ctrl">
         <input class="tsearch" type="text" placeholder="Search sites…" oninput="filterTbl('t-alarm',this.value)">
         <span class="tinfo" id="i-alarm"></span>
       </div>
       <div class="twrap"><table id="t-alarm"><thead><tr>
-        <th onclick="sortTbl('t-alarm',0)">Site Name</th>
-        <th onclick="sortTbl('t-alarm',1)">Circle</th>
-        <th onclick="sortTbl('t-alarm',2)">Site Type</th>
-        <th onclick="sortTbl('t-alarm',3)">PAC Raised</th>
-        <th onclick="sortTbl('t-alarm',4)">PAC Cleared</th>
-        <th onclick="sortTbl('t-alarm',5)">Duration</th>
-        <th onclick="sortTbl('t-alarm',6)">AC Paired?</th>
-        <th onclick="sortTbl('t-alarm',7)">TT No</th>
-        <th onclick="sortTbl('t-alarm',8)">TT Status</th>
-        <th onclick="sortTbl('t-alarm',9)">SAPID</th>
-        <th onclick="sortTbl('t-alarm',10)">Region</th>
+        <th onclick="sortTbl('t-alarm',0)">SAP Id</th>
+        <th onclick="sortTbl('t-alarm',1)">Site Name</th>
+        <th onclick="sortTbl('t-alarm',2)">Circle</th>
+        <th onclick="sortTbl('t-alarm',3)">Site Type</th>
+        <th onclick="sortTbl('t-alarm',4)">PAC Raise Time</th>
+        <th onclick="sortTbl('t-alarm',5)">PAC Clear Time</th>
+        <th onclick="sortTbl('t-alarm',6)">Duration</th>
+        <th onclick="sortTbl('t-alarm',7)">Bucket</th>
+        <th onclick="sortTbl('t-alarm',8)">AC Paired?</th>
+        <th onclick="sortTbl('t-alarm',9)">TT No</th>
+        <th onclick="sortTbl('t-alarm',10)">TT Status</th>
+        <th onclick="sortTbl('t-alarm',11)">Region</th>
       </tr></thead><tbody id="tbody-alarm"></tbody></table></div>
     </div>
 
@@ -398,7 +405,7 @@ const BP={'≤ 2 min':'p-fast','3-4 min':'p-mod','> 5 min':'p-alarm','Not Cleare
 const BHL={'≤ 2 min':'highlight-green','3-4 min':'highlight-amber','> 5 min':'highlight-red','Not Cleared':'highlight-red'};
 
 // ─── STATE ────────────────────────────────────────────────
-let S={raw:[],pac:[],acpf:[],fpac:[],charts:{},sort:{},activeKpi:null};
+let S={raw:[],pac:[],acpf:[],fpac:[],facpf:[],charts:{},sort:{},activeKpi:null};
 
 // ─── DATE HELPERS ─────────────────────────────────────────
 function pd(s){if(!s||s===''||s==='—')return null;try{return new Date(String(s).replace(' ','T'));}catch(e){return null;}}
@@ -465,9 +472,9 @@ function renderAll(){
   const dates=[...new Set(d.map(r=>r.Date_Display).filter(Boolean))].sort();
   const weeks=[...new Set(d.map(r=>r.Week).filter(Boolean))].sort();
   document.getElementById('meta-bar').textContent=
-    `Week ${weeks.join(', ')} | ${dates.join(' → ')} | ${d.length} PAC Fault · ${S.acpf.length} AC Power Fail`;
+    `Week ${weeks.join(', ')} | ${dates.join(' → ')} | ${d.length} PAC Fault · ${S.facpf.length} AC Power Fail`;
   renderKPIs(d);renderLegend(d);
-  renderCatChart(d);renderDayChart(d);renderSiteChart(d);renderCircleChart(d);
+  renderCatChart(d);renderTopDowntimeChart(d);renderSiteChart(d);
   renderPairTable(d);renderAlarmTable(d);
   if(S.activeKpi)expandKpi(S.activeKpi,true);
 }
@@ -479,7 +486,7 @@ function renderKPIs(d){
   document.getElementById('kv-fast').textContent=d.filter(r=>r._bucket==='≤ 2 min').length;
   document.getElementById('kv-mod').textContent=d.filter(r=>r._bucket==='3-4 min').length;
   document.getElementById('kv-alarm').textContent=d.filter(r=>r._bucket==='> 5 min').length;
-  document.getElementById('kv-acpf').textContent=S.acpf.length;
+  document.getElementById('kv-acpf').textContent=S.facpf.length;
 }
 
 // ─── LEGEND ───────────────────────────────────────────────
@@ -518,21 +525,49 @@ function renderCatChart(d){
   );
 }
 
-function renderDayChart(d){
-  const dates=[...new Set(d.map(r=>r.Date_Display).filter(Boolean))].sort();
-  const bd={};BO.forEach(b=>bd[b]=dates.map(()=>0));
-  d.forEach(r=>{const di=dates.indexOf(r.Date_Display);if(di<0)return;if(r._bucket in bd)bd[r._bucket][di]++;});
-  const ds=BO.filter(b=>bd[b].some(v=>v>0)).map(b=>({label:b,data:bd[b],backgroundColor:BC[b],borderRadius:4,borderWidth:0}));
-  mkChart('ch-day','bar',{labels:dates,datasets:ds},{
+function renderTopDowntimeChart(d){
+  // Aggregate total downtime (seconds) per site, skip Not Cleared
+  const siteMap={};
+  d.forEach(r=>{
+    if(r._dur_sec==null||r._bucket==='Not Cleared')return;
+    const sn=r.sitefriendlyname||r.ciname||'Unknown';
+    if(!siteMap[sn]){siteMap[sn]={dur:0,count:0,circle:r.circle||'',sitetype:r.sitetype||'',rows:[]};}
+    siteMap[sn].dur+=r._dur_sec;
+    siteMap[sn].count++;
+    siteMap[sn].rows.push(r);
+  });
+  const sorted=Object.entries(siteMap).sort((a,b)=>b[1].dur-a[1].dur).slice(0,10);
+  const lbs=sorted.map(e=>e[0]);
+  const durMins=sorted.map(e=>+(e[1].dur/60).toFixed(1));
+  const counts=sorted.map(e=>e[1].count);
+  mkChart('ch-day','bar',{
+    labels:lbs,
+    datasets:[{
+      label:'Total Downtime (min)',
+      data:durMins,
+      backgroundColor:'#dc2626',
+      borderRadius:4,
+      borderWidth:0
+    }]
+  },{
+    indexAxis:'y',
     onClick:(evt,els,chart)=>{
       if(!els.length)return;
-      const date=chart.data.labels[els[0].index];
-      const bucket=chart.data.datasets[els[0].datasetIndex].label;
-      const rows=S.fpac.filter(r=>r.Date_Display===date&&r._bucket===bucket);
-      showDetailPanel(`${date} | ${bucket}`,rows,'pac');
+      const siteName=chart.data.labels[els[0].index];
+      const rows=S.fpac.filter(r=>(r.sitefriendlyname||r.ciname)===siteName);
+      showDetailPanel(`${siteName} — All PAC Faults`,rows,'pac');
     },
-    scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,grid:{color:'#f1f5f9'}}},
-    plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8,boxWidth:12}}}
+    scales:{
+      x:{beginAtZero:true,grid:{color:'#f1f5f9'},title:{display:true,text:'Total Downtime (minutes)'}},
+      y:{grid:{display:false},ticks:{font:{size:11}}}
+    },
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>{
+        const e=sorted[ctx.dataIndex];
+        return[` Downtime: ${ctx.parsed.x} min`,` Alarms: ${e[1].count}`,` Circle: ${e[1].circle}`];
+      }}}
+    }
   });
 }
 
@@ -554,29 +589,6 @@ function renderSiteChart(d){
   });
 }
 
-function renderCircleChart(d){
-  const tot={},crit={};
-  d.forEach(r=>{const c=r.circle;if(!c)return;tot[c]=(tot[c]||0)+1;if(r._bucket==='> 5 min'||r._bucket==='Not Cleared')crit[c]=(crit[c]||0)+1;});
-  const sorted=Object.entries(tot).sort((a,b)=>b[1]-a[1]).slice(0,15);
-  const lbs=sorted.map(e=>e[0]),tc=sorted.map(e=>e[1]),cc=lbs.map(l=>crit[l]||0);
-  mkChart('ch-circle','bar',{
-    labels:lbs,
-    datasets:[
-      {label:'Fast/Moderate',data:tc.map((t,i)=>t-cc[i]),backgroundColor:'#10b981',borderRadius:3,borderWidth:0},
-      {label:'Alarming / Not Cleared',data:cc,backgroundColor:'#dc2626',borderRadius:3,borderWidth:0}
-    ]
-  },{
-    indexAxis:'y',
-    onClick:(evt,els,chart)=>{
-      if(!els.length)return;
-      const circle=chart.data.labels[els[0].index];
-      const rows=S.fpac.filter(r=>r.circle===circle);
-      showDetailPanel(`${circle} — All PAC Faults`,rows,'pac');
-    },
-    scales:{x:{stacked:true,beginAtZero:true,grid:{color:'#f1f5f9'}},y:{stacked:true,grid:{display:false},ticks:{font:{size:11}}}},
-    plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}}
-  });
-}
 
 // ─── PAIRING TABLE ────────────────────────────────────────
 function renderPairTable(d){
@@ -584,11 +596,12 @@ function renderPairTable(d){
   document.getElementById('badge-pair').textContent=paired;
   document.getElementById('i-pair').textContent=`${d.length} records (${paired} paired, ${unpaired} unpaired)`;
   document.getElementById('pair-minis').innerHTML=`
-    <div class="mini"><div class="ml">PAC Fault Total</div><div class="mv" style="color:#2563eb">${d.length}</div></div>
-    <div class="mini"><div class="ml">✅ Paired with AC Power Fail</div><div class="mv" style="color:#059669">${paired}</div></div>
-    <div class="mini"><div class="ml">⚠ Unpaired PAC Fault</div><div class="mv" style="color:#d97706">${unpaired}</div></div>
-    <div class="mini"><div class="ml">AC Power Fail Total</div><div class="mv" style="color:#0891b2">${S.acpf.length}</div></div>`;
+    <div class="mini" style="position:relative;cursor:default"><div class="ml">PAC Fault Total</div><div class="mv" style="color:#2563eb">${d.length}</div><button class="kpi-dl-btn" style="position:absolute;top:6px;right:6px" onclick="downloadPairMini('total')" title="Download Excel">⬇</button></div>
+    <div class="mini" style="position:relative;cursor:default"><div class="ml">✅ Paired with AC Power Fail</div><div class="mv" style="color:#059669">${paired}</div><button class="kpi-dl-btn" style="position:absolute;top:6px;right:6px" onclick="downloadPairMini('paired')" title="Download Excel">⬇</button></div>
+    <div class="mini" style="position:relative;cursor:default"><div class="ml">⚠ Unpaired PAC Fault</div><div class="mv" style="color:#d97706">${unpaired}</div><button class="kpi-dl-btn" style="position:absolute;top:6px;right:6px" onclick="downloadPairMini('unpaired')" title="Download Excel">⬇</button></div>
+    <div class="mini" style="position:relative;cursor:default"><div class="ml">AC Power Fail Total</div><div class="mv" style="color:#0891b2">${S.facpf.length}</div><button class="kpi-dl-btn" style="position:absolute;top:6px;right:6px" onclick="downloadPairMini('acpf')" title="Download Excel">⬇</button></div>`;
   document.getElementById('tbody-pair').innerHTML=d.map((r,i)=>`<tr class="${r._bucket==='> 5 min'?'tr-alarm':r._bucket==='Not Cleared'?'tr-nc':''}" onclick="openModal(${i},'pac')">
+    <td><small>${x(r.sapid)}</small></td>
     <td><strong>${x(r.sitefriendlyname||r.ciname)}</strong></td>
     <td>${x(r.circle)}</td><td><span class="pill p-site">${x(r.sitetype)}</span></td>
     <td>${x(r.alarm_raised_time)}</td><td>${x(r.alarm_cleared_time||'—')}</td>
@@ -597,7 +610,6 @@ function renderPairTable(d){
     <td>${x(r._ac?r._ac.alarm_raised_time:'—')}</td>
     <td>${x(r._gap)}</td>
     <td><span class="pill ${r._paired?'p-yes':'p-no'}">${r._paired?'✓ Yes':'✗ No'}</span></td>
-    <td><small>${x(r.sapid)}</small></td>
   </tr>`).join('');
 }
 
@@ -607,13 +619,15 @@ function renderAlarmTable(d){
   document.getElementById('badge-alarm').textContent=rows.length;
   document.getElementById('i-alarm').textContent=`${rows.length} records`;
   document.getElementById('tbody-alarm').innerHTML=rows.map((r,i)=>`<tr class="tr-alarm" onclick="openModal(S.fpac.indexOf(r),'pac')">
+    <td><small>${x(r.sapid)}</small></td>
     <td><strong>${x(r.sitefriendlyname||r.ciname)}</strong></td>
     <td>${x(r.circle)}</td><td><span class="pill p-site">${x(r.sitetype)}</span></td>
     <td>${x(r.alarm_raised_time)}</td><td>${x(r.alarm_cleared_time||'—')}</td>
     <td><strong style="color:#dc2626">${x(r._dur_str)}</strong></td>
+    <td><span class="pill p-alarm">${x(r._bucket)}</span></td>
     <td><span class="pill ${r._paired?'p-yes':'p-no'}">${r._paired?'✓ Paired':'✗ Unpaired'}</span></td>
     <td>${x(r.ttno)}</td><td>${x(r.ttstatus)}</td>
-    <td><small>${x(r.sapid)}</small></td><td>${x(r.region)}</td>
+    <td>${x(r.region)}</td>
   </tr>`).join('');
 }
 
@@ -626,46 +640,48 @@ function showDetailPanel(title,rows,type){
   const isPac=type==='pac';
   if(isPac){
     thead.innerHTML=`<tr>
-      <th onclick="sortTbl('t-kpi',0)">Site Name</th>
-      <th onclick="sortTbl('t-kpi',1)">Circle</th>
-      <th onclick="sortTbl('t-kpi',2)">Site Type</th>
-      <th onclick="sortTbl('t-kpi',3)">Raised Time</th>
-      <th onclick="sortTbl('t-kpi',4)">Cleared Time</th>
-      <th onclick="sortTbl('t-kpi',5)">Duration</th>
-      <th onclick="sortTbl('t-kpi',6)">Bucket</th>
-      <th onclick="sortTbl('t-kpi',7)">AC Paired</th>
-      <th onclick="sortTbl('t-kpi',8)">SAPID</th>
+      <th onclick="sortTbl('t-kpi',0)">SAP Id</th>
+      <th onclick="sortTbl('t-kpi',1)">Site Name</th>
+      <th onclick="sortTbl('t-kpi',2)">Circle</th>
+      <th onclick="sortTbl('t-kpi',3)">Site Type</th>
+      <th onclick="sortTbl('t-kpi',4)">PAC Raise Time</th>
+      <th onclick="sortTbl('t-kpi',5)">PAC Clear Time</th>
+      <th onclick="sortTbl('t-kpi',6)">Duration</th>
+      <th onclick="sortTbl('t-kpi',7)">Bucket</th>
+      <th onclick="sortTbl('t-kpi',8)">AC Paired</th>
       <th onclick="sortTbl('t-kpi',9)">Region</th>
     </tr>`;
     document.getElementById('kpi-tbody').innerHTML=rows.map(r=>{
       const idx=S.fpac.indexOf(r);
       return `<tr onclick="openModal(${idx},'pac')">
+        <td><small>${x(r.sapid)}</small></td>
         <td><strong>${x(r.sitefriendlyname||r.ciname)}</strong></td>
         <td>${x(r.circle)}</td><td><span class="pill p-site">${x(r.sitetype)}</span></td>
         <td>${x(r.alarm_raised_time)}</td><td>${x(r.alarm_cleared_time||'—')}</td>
         <td><strong>${x(r._dur_str)}</strong></td>
         <td><span class="pill ${BP[r._bucket]||''}">${x(r._bucket)}</span></td>
         <td><span class="pill ${r._paired?'p-yes':'p-no'}">${r._paired?'✓ Yes':'✗ No'}</span></td>
-        <td><small>${x(r.sapid)}</small></td><td>${x(r.region)}</td>
+        <td>${x(r.region)}</td>
       </tr>`;
     }).join('');
   } else {
     thead.innerHTML=`<tr>
-      <th onclick="sortTbl('t-kpi',0)">Site Name</th>
-      <th onclick="sortTbl('t-kpi',1)">Circle</th>
-      <th onclick="sortTbl('t-kpi',2)">Site Type</th>
-      <th onclick="sortTbl('t-kpi',3)">State</th>
-      <th onclick="sortTbl('t-kpi',4)">Raised Time</th>
-      <th onclick="sortTbl('t-kpi',5)">Cleared Time</th>
-      <th onclick="sortTbl('t-kpi',6)">SAPID</th>
+      <th onclick="sortTbl('t-kpi',0)">SAP Id</th>
+      <th onclick="sortTbl('t-kpi',1)">Site Name</th>
+      <th onclick="sortTbl('t-kpi',2)">Circle</th>
+      <th onclick="sortTbl('t-kpi',3)">Site Type</th>
+      <th onclick="sortTbl('t-kpi',4)">State</th>
+      <th onclick="sortTbl('t-kpi',5)">Raised Time</th>
+      <th onclick="sortTbl('t-kpi',6)">Cleared Time</th>
       <th onclick="sortTbl('t-kpi',7)">Region</th>
     </tr>`;
     document.getElementById('kpi-tbody').innerHTML=rows.map((r,i)=>`<tr onclick="openModal(${i},'acpf')">
+      <td><small>${x(r.sapid)}</small></td>
       <td><strong>${x(r.sitefriendlyname||r.ciname)}</strong></td>
       <td>${x(r.circle)}</td><td><span class="pill p-site">${x(r.sitetype)}</span></td>
       <td><span class="pill ${r.alarm_state==='RAISED'?'p-raised':'p-clear'}">${x(r.alarm_state)}</span></td>
       <td>${x(r.alarm_raised_time)}</td><td>${x(r.alarm_cleared_time||'—')}</td>
-      <td><small>${x(r.sapid)}</small></td><td>${x(r.region)}</td>
+      <td>${x(r.region)}</td>
     </tr>`).join('');
   }
   document.getElementById('kpi-tinfo').textContent=`${rows.length} records`;
@@ -693,7 +709,7 @@ function expandKpi(key,forceOpen){
   else if(key==='fast'){rows=d.filter(r=>r._bucket==='≤ 2 min');title='Fast Cleared ≤ 2 min';}
   else if(key==='mod'){rows=d.filter(r=>r._bucket==='3-4 min');title='Moderate 3-5 min';}
   else if(key==='alarm'){rows=d.filter(r=>r._bucket==='> 5 min');title='Alarming > 5 min';}
-  else if(key==='acpf'){rows=[...S.acpf];title='AC Power Fail Alarms';}
+  else if(key==='acpf'){rows=[...S.facpf];title='AC Power Fail Alarms';}
   showDetailPanel(title,rows,key==='acpf'?'acpf':'pac');
 }
 
@@ -703,9 +719,108 @@ function closeKpiPanel(){
   S.activeKpi=null;
 }
 
+// ─── KPI EXCEL DOWNLOAD ───────────────────────────────────
+function downloadKpiExcel(key){
+  let rows=[],fname='';
+  if(key==='total'){rows=[...S.fpac];fname='PAC_Fault_Total';}
+  else if(key==='nc'){rows=S.fpac.filter(r=>r._bucket==='Not Cleared');fname='PAC_Not_Cleared';}
+  else if(key==='fast'){rows=S.fpac.filter(r=>r._bucket==='≤ 2 min');fname='PAC_Fast';}
+  else if(key==='mod'){rows=S.fpac.filter(r=>r._bucket==='3-4 min');fname='PAC_Moderate';}
+  else if(key==='alarm'){rows=S.fpac.filter(r=>r._bucket==='> 5 min');fname='PAC_Alarming';}
+  else if(key==='acpf'){rows=[...S.facpf];fname='AC_Power_Fail';}
+  if(!rows.length){alert('No records to download.');return;}
+  // Build output rows using original column keys (exclude internal _ fields)
+  const cols=Object.keys(rows[0]).filter(k=>!k.startsWith('_')&&k!=='_paired'&&k!=='_ac'&&k!=='_gap'&&k!=='_dur_sec'&&k!=='_dur_str'&&k!=='_bucket');
+  // Add computed columns at end
+  const outRows=rows.map(r=>{
+    const obj={};
+    cols.forEach(k=>obj[k]=r[k]!==undefined?r[k]:'');
+    if(key!=='acpf'){obj['Duration']=r._dur_str||'';obj['Bucket']=r._bucket||'';obj['Paired_with_AC']=r._paired?'Yes':'No';}
+    return obj;
+  });
+  const ws=XLSX.utils.json_to_sheet(outRows);
+  const wb2=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb2,ws,fname.replace(/_/g,' '));
+  XLSX.writeFile(wb2,fname+'_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function downloadPairMini(key){
+  let rows=[],fname='';
+  if(key==='total'){rows=[...S.fpac];fname='Pairing_PAC_Fault_Total';}
+  else if(key==='paired'){rows=S.fpac.filter(r=>r._paired);fname='Pairing_Paired_with_AC_Fail';}
+  else if(key==='unpaired'){rows=S.fpac.filter(r=>!r._paired);fname='Pairing_Unpaired_PAC_Fault';}
+  else if(key==='acpf'){rows=[...S.facpf];fname='Pairing_AC_Power_Fail_Total';}
+  if(!rows.length){alert('No records to download.');return;}
+  const isAcpf=key==='acpf';
+  const cols=Object.keys(rows[0]).filter(k=>!k.startsWith('_'));
+  const outRows=rows.map(r=>{
+    const obj={};
+    cols.forEach(k=>obj[k]=r[k]!==undefined?r[k]:'');
+    if(!isAcpf){obj['Duration']=r._dur_str||'';obj['Bucket']=r._bucket||'';obj['Paired_with_AC']=r._paired?'Yes':'No';}
+    return obj;
+  });
+  const ws=XLSX.utils.json_to_sheet(outRows);
+  const wb2=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb2,ws,fname.replace(/_/g,' ').slice(0,31));
+  XLSX.writeFile(wb2,fname+'_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function downloadPairTable(){
+  const rows=S.fpac;
+  if(!rows.length){alert('No records to download.');return;}
+  const cols=Object.keys(rows[0]).filter(k=>!k.startsWith('_'));
+  const outRows=rows.map(r=>{
+    const obj={};cols.forEach(k=>obj[k]=r[k]!==undefined?r[k]:'');
+    obj['Duration']=r._dur_str||'';obj['Bucket']=r._bucket||'';
+    obj['Paired_with_AC']=r._paired?'Yes':'No';
+    obj['AC_Fail_Raised']=r._ac?r._ac.alarm_raised_time:'';
+    obj['AC_PAC_Gap']=r._gap||'';
+    return obj;
+  });
+  const ws=XLSX.utils.json_to_sheet(outRows);
+  const wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'AC PAC Pairing');
+  XLSX.writeFile(wb2,'AC_PAC_Pairing_Analysis_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function downloadAlarmTable(){
+  const rows=S.fpac.filter(r=>r._bucket==='> 5 min');
+  if(!rows.length){alert('No alarming records to download.');return;}
+  const cols=Object.keys(rows[0]).filter(k=>!k.startsWith('_'));
+  const outRows=rows.map(r=>{
+    const obj={};cols.forEach(k=>obj[k]=r[k]!==undefined?r[k]:'');
+    obj['Duration']=r._dur_str||'';obj['Bucket']=r._bucket||'';
+    obj['Paired_with_AC']=r._paired?'Yes':'No';
+    return obj;
+  });
+  const ws=XLSX.utils.json_to_sheet(outRows);
+  const wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'Alarming PAC Faults');
+  XLSX.writeFile(wb2,'Alarming_PAC_Faults_GT5min_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function downloadTopDowntime(){
+  const d=S.fpac;
+  if(!d.length){alert('No records to download.');return;}
+  const siteMap={};
+  d.forEach(r=>{
+    const key=(r.sitefriendlyname||r.ciname||'Unknown').trim();
+    if(!siteMap[key])siteMap[key]={site:key,circle:r.circle||'',sitetype:r.sitetype||'',totalSec:0,alarms:0};
+    siteMap[key].totalSec+=(r._dur_sec||0);siteMap[key].alarms++;
+  });
+  const top10=Object.values(siteMap).sort((a,b)=>b.totalSec-a.totalSec).slice(0,10);
+  const outRows=top10.map((s,i)=>{
+    const h=Math.floor(s.totalSec/3600),m=Math.floor((s.totalSec%3600)/60),sec=s.totalSec%60;
+    return{'Rank':i+1,'Site Name':s.site,'Circle':s.circle,'Site Type':s.sitetype,
+      'Total Downtime':`${h>0?h+'h ':''}${m>0?m+'m ':''}${sec}s`,
+      'Total Downtime (min)':Math.round(s.totalSec/60),'No of Alarms':s.alarms};
+  });
+  const ws=XLSX.utils.json_to_sheet(outRows);
+  const wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'Top 10 Downtime Sites');
+  XLSX.writeFile(wb2,'Top10_Alarming_Sites_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
 // ─── RECORD MODAL ─────────────────────────────────────────
 function openModal(idx,type){
-  const rec=type==='pac'?S.fpac[idx]:S.acpf[idx];
+  const rec=type==='pac'?S.fpac[idx]:S.facpf[idx];
   if(!rec)return;
 
   const bucketHL=BHL[rec._bucket]||'';
@@ -733,6 +848,10 @@ function openModal(idx,type){
   }
 
   document.getElementById('modal-body').innerHTML=`
+    <div class="modal-section">
+      <div class="modal-sec-title">📅 Week-over-Week PAC Alarm Trend</div>
+      <div style="position:relative;height:200px;"><canvas id="modal-wow-chart"></canvas></div>
+    </div>
     <div class="modal-section">
       <div class="modal-sec-title">⏱ Time &amp; Duration</div>
       <div class="field-grid">
@@ -794,12 +913,53 @@ function openModal(idx,type){
         ${fld('Source IP',x(rec.source_ip))}
         ${fld('Service Affecting',x(rec.service_affecting))}
       </div>
-    </div>`;
+    </div>
+    `;
 
   document.getElementById('rec-modal').classList.add('open');
+
+  // Render week-over-week chart for this site
+  requestAnimationFrame(()=>{
+    const siteName=(rec.sitefriendlyname||rec.ciname||'').trim();
+    const siteRows=S.pac.filter(r=>(r.sitefriendlyname||r.ciname||'').trim()===siteName&&r.Week);
+    const weekMap={};
+    siteRows.forEach(r=>{const w=String(r.Week);weekMap[w]=(weekMap[w]||0)+1;});
+    const weeks=Object.keys(weekMap).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    const counts=weeks.map(w=>weekMap[w]);
+    if(S.charts['modal-wow'])S.charts['modal-wow'].destroy();
+    const ctx=document.getElementById('modal-wow-chart');
+    if(ctx){
+      S.charts['modal-wow']=new Chart(ctx,{
+        type:'line',
+        data:{
+          labels:weeks.map(w=>'Week '+w),
+          datasets:[{
+            label:'PAC Alarms',
+            data:counts,
+            borderColor:'#2563eb',
+            backgroundColor:'rgba(37,99,235,0.1)',
+            pointBackgroundColor:'#2563eb',
+            pointRadius:5,
+            pointHoverRadius:7,
+            tension:0.35,
+            fill:true,
+            borderWidth:2
+          }]
+        },
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f1f5f9'},ticks:{stepSize:1}}},
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx2=>' Alarms: '+ctx2.parsed.y}}}
+        }
+      });
+    }
+  });
 }
 
-function closeModal(){document.getElementById('rec-modal').classList.remove('open');}
+function closeModal(){
+  document.getElementById('rec-modal').classList.remove('open');
+  if(S.charts['modal-wow']){S.charts['modal-wow'].destroy();delete S.charts['modal-wow'];}
+}
 
 // ─── FILTERS ──────────────────────────────────────────────
 function populateFilters(){
@@ -831,6 +991,12 @@ function applyFilters(){
     (wk==='ALL'||String(r.Week)===String(wk))&&
     (bk==='ALL'||r._bucket===bk)
   );
+  S.facpf=S.acpf.filter(r=>
+    (ci==='ALL'||r.circle===ci)&&
+    (si==='ALL'||r.sitetype===si)&&
+    (dt==='ALL'||r.Date_Display===dt)&&
+    (wk==='ALL'||String(r.Week)===String(wk))
+  );
   document.getElementById('fcount').textContent=`Showing ${S.fpac.length} of ${S.pac.length}`;
   S.activeKpi=null;closeKpiPanel();
   renderAll();
@@ -838,7 +1004,8 @@ function applyFilters(){
 
 function resetFilters(){
   ['f-circle','f-sitetype','f-date','f-week','f-bucket'].forEach(id=>document.getElementById(id).value='ALL');
-  S.fpac=[...S.pac];document.getElementById('fcount').textContent='';
+  S.fpac=[...S.pac];S.facpf=[...S.acpf];
+  document.getElementById('fcount').textContent='';
   S.activeKpi=null;closeKpiPanel();renderAll();
 }
 
@@ -876,7 +1043,7 @@ function handleFile(file){
         const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array',raw:false,defval:''});
         const allRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false,defval:''});
         const{pac,acpf}=processData(allRows);
-        S.raw=allRows;S.pac=pac;S.acpf=acpf;S.fpac=[...pac];
+        S.raw=allRows;S.pac=pac;S.acpf=acpf;S.fpac=[...pac];S.facpf=[...acpf];
         populateFilters();
         document.getElementById('empty-state').style.display='none';
         document.getElementById('dash-content').style.display='block';
@@ -927,30 +1094,29 @@ function downloadDashboard(){
 <div id="empty-state" style="display:none"></div>
 <div id="dash-content">
   <div class="kpi-grid" style="margin-bottom:4px">
-    <div class="kpi-card kc-blue" onclick="expandKpi('total')"><div class="lbl">Total PAC Fault</div><div class="val" id="kv-total">0</div><div class="sub">All records</div><div class="arrow">▼</div></div>
-    <div class="kpi-card kc-dark" onclick="expandKpi('nc')"><div class="lbl">🔴 Not Cleared</div><div class="val" id="kv-nc">0</div><div class="sub">Clear time missing</div><div class="arrow">▼</div></div>
-    <div class="kpi-card kc-green" onclick="expandKpi('fast')"><div class="lbl">🟢 Fast ≤ 2 min</div><div class="val" id="kv-fast">0</div><div class="sub">Normal restore</div><div class="arrow">▼</div></div>
-    <div class="kpi-card kc-amber" onclick="expandKpi('mod')"><div class="lbl">🟡 Moderate 3-5 min</div><div class="val" id="kv-mod">0</div><div class="sub">Watch closely</div><div class="arrow">▼</div></div>
-    <div class="kpi-card kc-red" onclick="expandKpi('alarm')"><div class="lbl">🔴 Alarming &gt; 5 min</div><div class="val" id="kv-alarm">0</div><div class="sub">Focus area</div><div class="arrow">▼</div></div>
-    <div class="kpi-card kc-sky" onclick="expandKpi('acpf')"><div class="lbl">⚡ AC Power Fail</div><div class="val" id="kv-acpf">0</div><div class="sub">All AC fail alarms</div><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-blue" onclick="expandKpi('total')"><div class="lbl">Total PAC Fault</div><div class="val" id="kv-total">0</div><div class="sub">All records</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('total')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-dark" onclick="expandKpi('nc')"><div class="lbl">🔴 Not Cleared</div><div class="val" id="kv-nc">0</div><div class="sub">Clear time missing</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('nc')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-green" onclick="expandKpi('fast')"><div class="lbl">🟢 Fast ≤ 2 min</div><div class="val" id="kv-fast">0</div><div class="sub">Normal restore</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('fast')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-amber" onclick="expandKpi('mod')"><div class="lbl">🟡 Moderate 3-5 min</div><div class="val" id="kv-mod">0</div><div class="sub">Watch closely</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('mod')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-red" onclick="expandKpi('alarm')"><div class="lbl">🔴 Alarming &gt; 5 min</div><div class="val" id="kv-alarm">0</div><div class="sub">Focus area</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('alarm')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
+    <div class="kpi-card kc-sky" onclick="expandKpi('acpf')"><div class="lbl">⚡ AC Power Fail</div><div class="val" id="kv-acpf">0</div><div class="sub">All AC fail alarms</div><button class="kpi-dl-btn" onclick="event.stopPropagation();downloadKpiExcel('acpf')" title="Download Excel">⬇</button><div class="arrow">▼</div></div>
   </div>
   <div id="kpi-panel"><div class="kpi-panel-hdr"><h3 id="kpi-panel-title">Details</h3><button class="kpi-panel-close" onclick="closeKpiPanel()">✕ Close</button></div><div class="tbl-ctrl"><input class="tsearch" type="text" placeholder="Search…" oninput="filterTbl('t-kpi',this.value)" id="kpi-search"><span class="tinfo" id="kpi-tinfo"></span></div><div class="twrap"><table id="t-kpi"><thead id="kpi-thead"><tr></tr></thead><tbody id="kpi-tbody"></tbody></table></div></div>
   <div class="g2">
     <div class="ccard"><h3>📊 PAC Fault Duration Bucket Distribution</h3><div class="chart-hint">🖱 Click a segment to drill into records</div><div class="cat-legend" id="cat-legend"></div><div class="ch"><canvas id="ch-cat"></canvas></div></div>
-    <div class="ccard"><h3>📅 Day-wise PAC Fault Trend</h3><div class="chart-hint">🖱 Click a bar segment to drill into records</div><div class="ch"><canvas id="ch-day"></canvas></div></div>
+    <div class="ccard"><h3>⏱ Top 10 Alarming Sites with Longest Downtime</h3><div class="chart-hint">🖱 Click a bar to see site records</div><div class="ch-lg"><canvas id="ch-day"></canvas></div></div>
   </div>
-  <div class="g2">
+  <div class="g2" style="grid-template-columns:1fr;">
     <div class="ccard"><h3>🏗 Site Type Analysis</h3><div class="chart-hint">🖱 Click a bar segment to drill into records</div><div class="ch"><canvas id="ch-site"></canvas></div></div>
-    <div class="ccard"><h3>🗺 Circle-wise Alarm Count</h3><div class="chart-hint">🖱 Click a bar to see all alarms for that circle</div><div class="ch-lg"><canvas id="ch-circle"></canvas></div></div>
   </div>
-  <div class="ccard" style="margin-bottom:20px"><div class="stitle">⚡ AC Power Fail ↔ PAC Fault Pairing <span class="badge bg-sky" id="badge-pair">0</span></div><div class="minis" id="pair-minis"></div><div class="alert-box">📌 <strong>Logic:</strong> EB power fails → AC Power Fail → PAC Fault triggers. Cleared when EB restored. Pairs matched by site &amp; time window.</div><div class="tbl-ctrl"><input class="tsearch" type="text" placeholder="Search…" oninput="filterTbl('t-pair',this.value)"><span class="tinfo" id="i-pair"></span></div><div class="twrap"><table id="t-pair"><thead><tr><th onclick="sortTbl('t-pair',0)">Site Name</th><th onclick="sortTbl('t-pair',1)">Circle</th><th onclick="sortTbl('t-pair',2)">Site Type</th><th onclick="sortTbl('t-pair',3)">PAC Raised</th><th onclick="sortTbl('t-pair',4)">PAC Cleared</th><th onclick="sortTbl('t-pair',5)">Duration</th><th onclick="sortTbl('t-pair',6)">Bucket</th><th onclick="sortTbl('t-pair',7)">AC Fail Raised</th><th onclick="sortTbl('t-pair',8)">AC-PAC Gap</th><th onclick="sortTbl('t-pair',9)">Paired</th><th onclick="sortTbl('t-pair',10)">SAPID</th></tr></thead><tbody id="tbody-pair"></tbody></table></div></div>
-  <div class="ccard" style="margin-bottom:20px"><div class="stitle">🔴 Alarming PAC Faults — &gt; 5 min <span class="badge bg-red" id="badge-alarm">0</span></div><div class="alert-box">🔍 Priority sites for analysis and rectification.</div><div class="tbl-ctrl"><input class="tsearch" type="text" placeholder="Search…" oninput="filterTbl('t-alarm',this.value)"><span class="tinfo" id="i-alarm"></span></div><div class="twrap"><table id="t-alarm"><thead><tr><th onclick="sortTbl('t-alarm',0)">Site Name</th><th onclick="sortTbl('t-alarm',1)">Circle</th><th onclick="sortTbl('t-alarm',2)">Site Type</th><th onclick="sortTbl('t-alarm',3)">PAC Raised</th><th onclick="sortTbl('t-alarm',4)">PAC Cleared</th><th onclick="sortTbl('t-alarm',5)">Duration</th><th onclick="sortTbl('t-alarm',6)">AC Paired?</th><th onclick="sortTbl('t-alarm',7)">TT No</th><th onclick="sortTbl('t-alarm',8)">TT Status</th><th onclick="sortTbl('t-alarm',9)">SAPID</th><th onclick="sortTbl('t-alarm',10)">Region</th></tr></thead><tbody id="tbody-alarm"></tbody></table></div></div>
+  <div class="ccard" style="margin-bottom:20px"><div class="stitle">⚡ AC Power Fail ↔ PAC Fault Pairing <span class="badge bg-sky" id="badge-pair">0</span></div><div class="minis" id="pair-minis"></div><div class="alert-box">📌 <strong>Logic:</strong> EB power fails → AC Power Fail → PAC Fault triggers. Cleared when EB restored. Pairs matched by site &amp; time window.</div><div class="tbl-ctrl"><input class="tsearch" type="text" placeholder="Search…" oninput="filterTbl('t-pair',this.value)"><span class="tinfo" id="i-pair"></span></div><div class="twrap"><table id="t-pair"><thead><tr><th onclick="sortTbl('t-pair',0)">SAP Id</th><th onclick="sortTbl('t-pair',1)">Site Name</th><th onclick="sortTbl('t-pair',2)">Circle</th><th onclick="sortTbl('t-pair',3)">Site Type</th><th onclick="sortTbl('t-pair',4)">PAC Raise Time</th><th onclick="sortTbl('t-pair',5)">PAC Clear Time</th><th onclick="sortTbl('t-pair',6)">Duration</th><th onclick="sortTbl('t-pair',7)">Bucket</th><th onclick="sortTbl('t-pair',8)">AC Fail Raised</th><th onclick="sortTbl('t-pair',9)">AC-PAC Gap</th><th onclick="sortTbl('t-pair',10)">Paired</th></tr></thead><tbody id="tbody-pair"></tbody></table></div></div>
+  <div class="ccard" style="margin-bottom:20px"><div class="stitle">🔴 Alarming PAC Faults — &gt; 5 min <span class="badge bg-red" id="badge-alarm">0</span></div><div class="alert-box">🔍 Priority sites for analysis and rectification.</div><div class="tbl-ctrl"><input class="tsearch" type="text" placeholder="Search…" oninput="filterTbl('t-alarm',this.value)"><span class="tinfo" id="i-alarm"></span></div><div class="twrap"><table id="t-alarm"><thead><tr><th onclick="sortTbl('t-alarm',0)">SAP Id</th><th onclick="sortTbl('t-alarm',1)">Site Name</th><th onclick="sortTbl('t-alarm',2)">Circle</th><th onclick="sortTbl('t-alarm',3)">Site Type</th><th onclick="sortTbl('t-alarm',4)">PAC Raise Time</th><th onclick="sortTbl('t-alarm',5)">PAC Clear Time</th><th onclick="sortTbl('t-alarm',6)">Duration</th><th onclick="sortTbl('t-alarm',7)">Bucket</th><th onclick="sortTbl('t-alarm',8)">AC Paired?</th><th onclick="sortTbl('t-alarm',9)">TT No</th><th onclick="sortTbl('t-alarm',10)">TT Status</th><th onclick="sortTbl('t-alarm',11)">Region</th></tr></thead><tbody id="tbody-alarm"></tbody></table></div></div>
 </div></div>
 <div id="rec-modal"><div class="modal-overlay" onclick="closeModal()"></div><div class="modal-card"><div class="modal-hdr"><h2 id="modal-title">Record Details</h2><button class="modal-close" onclick="closeModal()">✕</button></div><div class="modal-body" id="modal-body"></div></div></div>
 <script>${cjs}<\/script>
 <script>
 ${logic}
-S.pac=${d1};S.acpf=${d2};S.fpac=[...S.pac];
+S.pac=${d1};S.acpf=${d2};S.fpac=[...S.pac];S.facpf=[...S.acpf];
 function populateFilters(){
   const d=S.pac;
   const set=(id,vals,lbl)=>{
@@ -969,12 +1135,13 @@ function applyFilters(){
   const wk=document.getElementById('f-week').value;
   const bk=document.getElementById('f-bucket').value;
   S.fpac=S.pac.filter(r=>(ci==='ALL'||r.circle===ci)&&(si==='ALL'||r.sitetype===si)&&(dt==='ALL'||r.Date_Display===dt)&&(wk==='ALL'||String(r.Week)===String(wk))&&(bk==='ALL'||r._bucket===bk));
+  S.facpf=S.acpf.filter(r=>(ci==='ALL'||r.circle===ci)&&(si==='ALL'||r.sitetype===si)&&(dt==='ALL'||r.Date_Display===dt)&&(wk==='ALL'||String(r.Week)===String(wk)));
   document.getElementById('fcount').textContent='Showing '+S.fpac.length+' of '+S.pac.length;
   S.activeKpi=null;closeKpiPanel();renderAll();
 }
 function resetFilters(){
   ['f-circle','f-sitetype','f-date','f-week','f-bucket'].forEach(id=>document.getElementById(id).value='ALL');
-  S.fpac=[...S.pac];document.getElementById('fcount').textContent='';
+  S.fpac=[...S.pac];S.facpf=[...S.acpf];document.getElementById('fcount').textContent='';
   S.activeKpi=null;closeKpiPanel();renderAll();
 }
 window.addEventListener('DOMContentLoaded',()=>{populateFilters();renderAll();});
